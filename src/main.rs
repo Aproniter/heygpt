@@ -340,7 +340,13 @@ impl Session {
                 Ok(Event::Message(message)) => {
                     trace!("response stream message: {:?}", &message);
                     let message: ResponseStreamMessage = serde_json::from_str(&message.data)?;
-                    let delta = message.choices.into_iter().next().unwrap().delta;
+                    let into_iter = message.choices.into_iter().next();
+                    let delta = match into_iter {
+                        Some(choice) => choice.delta,
+                        None => {
+                            continue;
+                        }
+                    };
                     if let Some(role) = delta.role {
                         full_message.role.push_str(&role);
 
